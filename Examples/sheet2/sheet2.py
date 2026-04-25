@@ -1,36 +1,17 @@
-
 import pandas as pd
 import numpy as np
+from sklearn.linear_model import LinearRegression, Ridge, Lasso
 import os
 
-# folder path
-path = ("/home/electronica/ML_Assignments")
-# print("Path to folder:", path)
-
-#Just shortening the argument to be thrown
+# 1. Setup paths and load data
+path = "/home/electronica/ML_Assignments"
 file_path = os.path.join(path, "employee_salary_data.csv")
-
-# Prepare
 data_frame = pd.read_csv(file_path)
 
-# Test :)
-# print("\n--- Data IS READY ---")
-# print(data_frame.head(2))
-
-# Here we go 
-
-
-# Load your data
-
-# Step A: Use Experienceyears to predict Salary
-X = data_frame['YearsExperience'].values
-path = ("/home/electronica/ML_Assignments")
-file_path = os.path.join(path, "employee_salary_data.csv")
-
-data_frame = pd.read_csv(file_path)
-
-X = data_frame['YearsExperience'].values
-y = data_frame['Salary'].values
+# --- PART A: MANUAL GRADIENT DESCENT ---
+# We use .values to get flat 1D arrays for the manual math
+X_manual = data_frame['YearsExperience'].values
+y_manual = data_frame['Salary'].values
 
 def gradient_descent(X, y, learning_rate=0.01, iterations=1000):
     m = 0
@@ -38,62 +19,40 @@ def gradient_descent(X, y, learning_rate=0.01, iterations=1000):
     n = len(y)
     for i in range(iterations):
         y_predicted = m * X + b
-        cost = (1/n) * sum([val**2 for val in (y - y_predicted)])
-        m_gradient = -(2/n) * sum(X * (y - y_predicted))
-        b_gradient = -(2/n) * sum(y - y_predicted)
+        # Now y and y_predicted are both 1D, so this works!
+        cost = (1/n) * np.sum((y - y_predicted)**2)
+        
+        m_gradient = -(2/n) * np.sum(X * (y - y_predicted))
+        b_gradient = -(2/n) * np.sum(y - y_predicted)
+        
         m = m - (learning_rate * m_gradient)
         b = b - (learning_rate * b_gradient)
+        
         if i % 100 == 0:
             print(f"Iteration {i}: Cost {cost:.2f}, m {m:.2f}, b {b:.2f}")
             
     return m, b
 
-final_m, final_b = gradient_descent(X, y)
+# Run the manual training
+final_m, final_b = gradient_descent(X_manual, y_manual)
 
-print(f"\n--- Training Complete ---")
-print(f"Final Slope (m): {final_m}")
-print(f"Final Intercept (b): {final_b}")
+print(f"\n--- Manual Training Complete ---")
+print(f"Final Slope (m): {final_m:.2f}")
+print(f"Final Intercept (b): {final_b:.2f}")
 
-years = 10
-predicted_salary = final_m * years + final_b
-print(f"Predicted Salary for {years} years: ${predicted_salary:,.2f}")
+# --- PART B: SCIKIT-LEARN (Linear, Ridge, Lasso) ---
+# We use the DataFrame directly for X so it stays 2D and keeps column names
+X_sk = data_frame[['YearsExperience']] # Note the double brackets
+y_sk = data_frame['Salary']
 
-# Step B: Implement Gradient Descent (from scratch)
-def gradient_descent(X, y, learning_rate=0.01, iterations=1000):
-    m = 0  # Starting Slope (Weight)
-    b = 0  # Starting Intercept (Bias)
-    n = len(y) # Number of data points
+lin_reg = LinearRegression().fit(X_sk, y_sk)
+ridge_reg = Ridge(alpha=1.0).fit(X_sk, y_sk)
+lasso_reg = Lasso(alpha=1.0).fit(X_sk, y_sk)
 
-    for i in range(iterations):
-        # 1. Make a prediction using the current line (y = mx + b)
-        y_predicted = m * X + b
-        
-        # 2. Calculate the Error (Cost)
-        cost = (1/n) * sum([val**2 for val in (y - y_predicted)])
-        
-        # 3. Calculate the "Gradients" (The direction to move)
-        # These are derived from calculus to find the slope of the error curve
-        m_gradient = -(2/n) * sum(X * (y - y_predicted))
-        b_gradient = -(2/n) * sum(y - y_predicted)
-        
-        # 4. Update the numbers (The "Learning" step)
-        m = m - (learning_rate * m_gradient)
-        b = b - (learning_rate * b_gradient)
-        
-        # Optional: Print progress every 100 steps
-        if i % 100 == 0:
-            print(f"Iteration {i}: Cost {cost:.2f}, m {m:.2f}, b {b:.2f}")
-            
-    return m, b
+print("\n--- Model Comparison ---")
+print(f"{'Feature':<15} | {'Linear':<10} | {'Ridge':<10} | {'Lasso':<10}")
+print("-" * 50)
 
-# Run the training
-final_m, final_b = gradient_descent(X, y)
-
-print(f"\n--- Training Complete ---")
-print(f"Final Slope (m): {final_m}")
-print(f"Final Intercept (b): {final_b}")
-
-# Testing a prediction
-years = 10
-predicted_salary = final_m * years + final_b
-print(f"Predicted Salary for {years} years: ${predicted_salary:,.2f}")
+# We use X_sk.columns because it is a DataFrame and has names
+for i, feature in enumerate(X_sk.columns):
+    print(f"{feature:<15} | {lin_reg.coef_[i]:.2f} | {ridge_reg.coef_[i]:.2f} | {lasso_reg.coef_[i]:.2f}")
