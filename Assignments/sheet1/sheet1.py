@@ -22,13 +22,13 @@ data_frame['species'] = iris.target
 # plt.ylabel('Petal Width')
 # plt.title('Petal Analysis')
 
-# plt.hist(data_frame['petal width (cm)'], bins=20, color='purple', alpha=0.7)
+plt.hist(data_frame['petal width (cm)'], bins=20, color='purple', alpha=0.7)
 
-# plt.xlabel('Petal Width')
-# plt.ylabel('Frequency')
-# plt.title('Petal Width Distribution')
+plt.xlabel('Petal Width')
+plt.ylabel('Frequency')
+plt.title('Petal Width Distribution')
 
 # Show the hist plot:
-# plt.show()
+plt.show()
 
 
