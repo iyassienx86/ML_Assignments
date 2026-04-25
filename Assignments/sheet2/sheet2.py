@@ -2,6 +2,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
+import matplotlib.pyplot as plt
 import os
 
 # 1. Load the data
@@ -31,3 +32,22 @@ print(f"--- Assignment Part 1 Results ---")
 print(f"Training rows: {len(X_train)}")
 print(f"Testing rows: {len(X_test)}")
 print(f"Model MSE: {mse:.2f}")
+
+
+plt.figure(figsize=(8, 6))
+plt.scatter(y_test, y_prediction, color='blue', label='Predictions')
+
+# 7. Add a "Perfect Match" line (Diagonal line)
+# This line shows where Actual = Predicted
+plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], color='red', linestyle='--', label='Perfect Fit Line')
+
+# 8. Add Labels and Title
+plt.xlabel('Actual Salaries ($)')
+plt.ylabel('Predicted Salaries ($)')
+plt.title('Assignment Part 2: Actual vs Predicted Salaries')
+plt.legend()
+plt.grid(True)
+
+# 9. Save the result
+plt.savefig('actual_vs_predicted.png')
+print("\n[Assignment Complete: Visualization saved as actual_vs_predicted.png]")
